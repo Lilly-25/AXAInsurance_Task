@@ -148,6 +148,12 @@ jobs:
         sleep 10  # API starten lassen
         
     - name: 🧪 Run Integration Tests
+      env:
+        DB_HOST: localhost
+        DB_PORT: 5432
+        DB_NAME: ${{ secrets.TEST_DB_NAME }}
+        DB_USER: ${{ secrets.TEST_DB_USER }}
+        DB_PASSWORD: ${{ secrets.TEST_DB_PASSWORD }}
       run: |
         python -m pytest tests/integration/ -v
         

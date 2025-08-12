@@ -18,16 +18,19 @@ def setup_test_environment():
         "DB_PORT": os.getenv("DB_PORT", "5432"),
         "DB_NAME": os.getenv("DB_NAME", "titanic"),
         "DB_USER": os.getenv("DB_USER", "postgres"),
-        "DB_PASSWORD": os.getenv(
-            "DB_PASSWORD"
-        ),  # Kein Default - muss über Umgebung gesetzt werden!
         "LOG_LEVEL": "ERROR",  # Reduziere Logs in Tests
         "DEBUG": "false",
     }
+    
+    # DB_PASSWORD nur setzen wenn verfügbar
+    db_password = os.getenv("DB_PASSWORD")
+    if db_password is not None:
+        test_env["DB_PASSWORD"] = db_password
 
     # Umgebungsvariablen setzen
     for key, value in test_env.items():
-        os.environ[key] = value
+        if value is not None:  # Nur nicht-None Werte setzen
+            os.environ[key] = value
 
     yield
 

@@ -21,7 +21,7 @@ def setup_test_environment():
         "LOG_LEVEL": "ERROR",  # Reduziere Logs in Tests
         "DEBUG": "false",
     }
-    
+
     # DB_PASSWORD nur setzen wenn verfügbar
     db_password = os.getenv("DB_PASSWORD")
     if db_password is not None:

@@ -15,8 +15,7 @@ from api.database.connection import init_database
 
 # Logging-Konfiguration
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -31,9 +30,9 @@ async def lifespan(app: FastAPI):
     logger.info("Starte Titanic API...")
     init_database()
     logger.info("Datenbank initialisiert")
-    
+
     yield
-    
+
     # Shutdown
     logger.info("Stoppe Titanic API...")
 
@@ -45,7 +44,7 @@ app = FastAPI(
     version="1.0.0",
     docs_url="/docs",
     redoc_url="/redoc",
-    lifespan=lifespan
+    lifespan=lifespan,
 )
 
 # CORS-Middleware hinzufügen für Cross-Origin-Requests
@@ -60,15 +59,11 @@ app.add_middleware(
 # Trusted Host Middleware für Sicherheit
 app.add_middleware(
     TrustedHostMiddleware,
-    allowed_hosts=["*"]  # In Produktion spezifische Hosts angeben
+    allowed_hosts=["*"],  # In Produktion spezifische Hosts angeben
 )
 
 # Router einbinden
-app.include_router(
-    passengers.router,
-    prefix="/api/v1",
-    tags=["passengers"]
-)
+app.include_router(passengers.router, prefix="/api/v1", tags=["passengers"])
 
 
 @app.get("/")
@@ -88,18 +83,12 @@ async def health_check():
     return {
         "status": "healthy",
         "message": "Titanic API ist betriebsbereit",
-        "version": "1.0.0"
+        "version": "1.0.0",
     }
 
 
 if __name__ == "__main__":
     import uvicorn
-    
+
     # API in der Entwicklungsumgebung starten
-    uvicorn.run(
-        "main:app",
-        host="0.0.0.0",
-        port=8000,
-        reload=True,
-        log_level="info"
-    )
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True, log_level="info")

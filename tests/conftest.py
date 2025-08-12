@@ -8,6 +8,7 @@ import os
 import asyncio
 from typing import Generator
 
+
 # Umgebungsvariablen für Tests setzen
 @pytest.fixture(scope="session", autouse=True)
 def setup_test_environment():
@@ -17,17 +18,19 @@ def setup_test_environment():
         "DB_PORT": os.getenv("DB_PORT", "5432"),
         "DB_NAME": os.getenv("DB_NAME", "titanic"),
         "DB_USER": os.getenv("DB_USER", "postgres"),
-        "DB_PASSWORD": os.getenv("DB_PASSWORD"),  # Kein Default - muss über Umgebung gesetzt werden!
+        "DB_PASSWORD": os.getenv(
+            "DB_PASSWORD"
+        ),  # Kein Default - muss über Umgebung gesetzt werden!
         "LOG_LEVEL": "ERROR",  # Reduziere Logs in Tests
         "DEBUG": "false",
     }
-    
+
     # Umgebungsvariablen setzen
     for key, value in test_env.items():
         os.environ[key] = value
-    
+
     yield
-    
+
     # Cleanup nach Tests (optional)
     pass
 
@@ -64,7 +67,7 @@ def sample_passenger_data() -> dict:
         "who": "woman",
         "deck": "B",
         "embark_town": "Southampton",
-        "alive": "yes"
+        "alive": "yes",
     }
 
 

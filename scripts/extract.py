@@ -8,20 +8,21 @@ import pandas as pd
 from pathlib import Path
 import sys
 
+
 def main():
     print("=== TITANIC DATA EXTRACTOR ===")
     print("Starting data extraction...")
-    
+
     try:
         # Connect to SQLite database
         db_path = "../data/titanic.db"
         if not Path(db_path).exists():
             print(f"ERROR: Database file {db_path} not found!")
             return False
-            
+
         print(f"Connecting to {db_path}...")
         conn = sqlite3.connect(db_path)
-        
+
         # Your comprehensive JOIN query from the notebook
         query = """
         SELECT 
@@ -50,18 +51,20 @@ def main():
         LEFT JOIN Alive a ON o.alive_id = a.alive_id
         ORDER BY o.ROWID
         """
-        
+
         print("Executing JOIN query from notebook...")
         df = pd.read_sql_query(query, conn)
         conn.close()
-        
+
         print(f"SUCCESS: Extracted {len(df)} records")
-        print(f"Survivors: {df['survived'].sum()}/{len(df)} ({df['survived'].mean()*100:.1f}%)")
-        
+        print(
+            f"Survivors: {df['survived'].sum()}/{len(df)} ({df['survived'].mean()*100:.1f}%)"
+        )
+
         # Generate PostgreSQL init script that recreates the original normalized structure
         output_file = "../sql/init_db.sql"
         print(f"Generating PostgreSQL script: {output_file}")
-        
+
         sql_content = """-- PostgreSQL Initialisierung mit echten Titanic-Daten
 -- Automatisch generiert aus titanic.db
 
@@ -133,58 +136,73 @@ INSERT INTO Alive (alive_id, alive) VALUES (0, 'no'), (1, 'yes');
 -- Observation-Daten einfügen
 INSERT INTO Observation (survived, pclass, age, sibsp, parch, fare, adult_male, alone, sex_id, embarked_id, class_id, who_id, deck_id, embark_town_id, alive_id) VALUES
 """
-        
+
         # Generate observation data rows with proper foreign keys
         rows = []
         for _, row in df.iterrows():
             # Map values to foreign keys
-            sex_id = 1 if row['sex'] == 'male' else 0
-            
+            sex_id = 1 if row["sex"] == "male" else 0
+
             # Map embarked
-            embarked_map = {None: -1, 'C': 0, 'Q': 1, 'S': 2}
-            embarked_id = embarked_map.get(row['embarked'], -1)
-            
+            embarked_map = {None: -1, "C": 0, "Q": 1, "S": 2}
+            embarked_id = embarked_map.get(row["embarked"], -1)
+
             # Map class
-            class_map = {'First': 0, 'Second': 1, 'Third': 2}
-            class_id = class_map.get(row['class'], 2)
-            
+            class_map = {"First": 0, "Second": 1, "Third": 2}
+            class_id = class_map.get(row["class"], 2)
+
             # Map who
-            who_map = {'child': 0, 'man': 1, 'woman': 2}
-            who_id = who_map.get(row['who'], 1)
-            
+            who_map = {"child": 0, "man": 1, "woman": 2}
+            who_id = who_map.get(row["who"], 1)
+
             # Map deck
-            deck_map = {None: -1, 'A': 0, 'B': 1, 'C': 2, 'D': 3, 'E': 4, 'F': 5, 'G': 6, 'T': 7}
-            deck_id = deck_map.get(row['deck'], -1)
-            
+            deck_map = {
+                None: -1,
+                "A": 0,
+                "B": 1,
+                "C": 2,
+                "D": 3,
+                "E": 4,
+                "F": 5,
+                "G": 6,
+                "T": 7,
+            }
+            deck_id = deck_map.get(row["deck"], -1)
+
             # Map embark_town
-            embark_town_map = {None: -1, 'Cherbourg': 0, 'Queenstown': 1, 'Southampton': 2}
-            embark_town_id = embark_town_map.get(row['embark_town'], -1)
-            
+            embark_town_map = {
+                None: -1,
+                "Cherbourg": 0,
+                "Queenstown": 1,
+                "Southampton": 2,
+            }
+            embark_town_id = embark_town_map.get(row["embark_town"], -1)
+
             # Map alive
-            alive_id = 1 if row['alive'] == 'yes' else 0
-            
+            alive_id = 1 if row["alive"] == "yes" else 0
+
             # Handle NULL values
-            age = f"{row['age']:.2f}" if pd.notnull(row['age']) else "NULL"
-            fare = f"{row['fare']:.4f}" if pd.notnull(row['fare']) else "NULL"
-            
+            age = f"{row['age']:.2f}" if pd.notnull(row["age"]) else "NULL"
+            fare = f"{row['fare']:.4f}" if pd.notnull(row["fare"]) else "NULL"
+
             # Boolean values
-            adult_male = 'TRUE' if row['adult_male'] else 'FALSE'
-            alone = 'TRUE' if row['alone'] else 'FALSE'
-            
+            adult_male = "TRUE" if row["adult_male"] else "FALSE"
+            alone = "TRUE" if row["alone"] else "FALSE"
+
             row_sql = f"({row['survived']}, {row['pclass']}, {age}, {row['sibsp']}, {row['parch']}, {fare}, {adult_male}, {alone}, {sex_id}, {embarked_id}, {class_id}, {who_id}, {deck_id}, {embark_town_id}, {alive_id})"
             rows.append(row_sql)
-        
+
         # Add rows in batches
         batch_size = 50
         for i in range(0, len(rows), batch_size):
-            batch = rows[i:i+batch_size]
+            batch = rows[i : i + batch_size]
             sql_content += "\n" + ",\n".join(batch)
-            
+
             if i + batch_size < len(rows):
                 sql_content += ";\n\nINSERT INTO Observation (survived, pclass, age, sibsp, parch, fare, adult_male, alone, sex_id, embarked_id, class_id, who_id, deck_id, embark_town_id, alive_id) VALUES"
             else:
                 sql_content += ";\n"
-        
+
         # Add final statements
         sql_content += f"""
 -- Reset sequences
@@ -207,24 +225,26 @@ BEGIN
     RAISE NOTICE '% passenger records loaded', (SELECT COUNT(*) FROM Observation);
 END $$;
 """
-        
+
         # Write the file
         Path(output_file).parent.mkdir(parents=True, exist_ok=True)
-        with open(output_file, 'w', encoding='utf-8') as f:
+        with open(output_file, "w", encoding="utf-8") as f:
             f.write(sql_content)
-        
+
         file_size = Path(output_file).stat().st_size / 1024
         print(f"SUCCESS: Generated {output_file} ({file_size:.1f} KB)")
         print(f"Records processed: {len(df)}")
         print("PostgreSQL init script ready!")
-        
+
         return True
-        
+
     except Exception as e:
         print(f"ERROR: {e}")
         import traceback
+
         traceback.print_exc()
         return False
+
 
 if __name__ == "__main__":
     success = main()

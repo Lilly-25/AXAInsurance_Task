@@ -69,14 +69,14 @@ jobs:
         
     - name: 🧪 Run Unit Tests
       env:
-        DB_PASSWORD: ${{ secrets.TEST_DB_PASSWORD || 'test_password' }}
+        DB_PASSWORD: ${{ secrets.TEST_DB_PASSWORD }}
         DB_HOST: "localhost"
         DB_PORT: "5432"
-        DB_NAME: ${{ secrets.TEST_DB_NAME || 'test_db' }}
-        DB_USER: ${{ secrets.TEST_DB_USER || 'test_user' }}
+        DB_NAME: ${{ secrets.TEST_DB_NAME }}
+        DB_USER: ${{ secrets.TEST_DB_USER }}
         TESTING: "true"
       run: |
-        python -m pytest tests/unit/test_api.py::TestPassengerModels -v --cov=api --cov-report=xml --cov-report=html || echo "Unit tests completed"
+        python -m pytest tests/unit/test_api.py::TestPassengerModels -v --cov=api --cov-report=xml --cov-report=html
         
     - name: 📊 Upload Coverage to Codecov
       uses: codecov/codecov-action@v3

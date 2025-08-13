@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Titanic API - Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            animation: fadeIn 1s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .header {
+            background: linear-gradient(45deg, #1a237e, #3949ab);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+        }
+        
+        .logout-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 8px 15px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        
+        .logout-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        .user-info {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        .titanic-ship {
+            font-size: 60px;
+            margin-bottom: 10px;
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .welcome-section {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .welcome-section h2 {
+            color: #1a237e;
+            font-size: 28px;
+            margin-bottom: 15px;
+        }
+        
+        .welcome-section p {
+            color: #666;
+            font-size: 18px;
+            line-height: 1.6;
+        }
+        
+        .api-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-top: 40px;
+        }
+        
+        .api-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            border-left: 5px solid #3949ab;
+        }
+        
+        .api-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+        }
+        
+        .api-card h3 {
+            color: #1a237e;
+            font-size: 20px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .api-card p {
+            color: #666;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+        
+        .api-btn {
+            display: inline-block;
+            background: linear-gradient(45deg, #1a237e, #3949ab);
+            color: white;
+            padding: 12px 20px;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .api-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(26, 35, 126, 0.3);
+        }
+        
+        .stats-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin: 40px 0;
+            text-align: center;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .stat-item {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .stat-number {
+            font-size: 32px;
+            font-weight: bold;
+            color: #1a237e;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+            border-top: 1px solid #e0e0e0;
+            background: #f8f9fa;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="user-info">👤 {{ user_role }} • {{ username }}</div>
+            <a href="/auth/logout" class="logout-btn">🚪 Abmelden</a>
+            
+            <div class="titanic-ship">🚢</div>
+            <h1>Titanic API Dashboard</h1>
+            <p>Erkunden Sie die Daten des berühmtesten Schiffs der Geschichte</p>
+        </div>
+        
+        <div class="content">
+            <div class="welcome-section">
+                <h2>Willkommen an Bord, {{ username }}! 🎫</h2>
+                <p>Sie haben nun Zugang zur Titanic-Passagierdatenbank. Erkunden Sie die Geschichten, analysieren Sie die Daten und entdecken Sie Einblicke von dieser historischen Reise.</p>
+            </div>
+            
+            <div class="stats-section">
+                <h3 style="color: #1a237e; margin-bottom: 20px;">📊 Datenbank-Übersicht</h3>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-number">891</div>
+                        <div class="stat-label">Passagiere gesamt</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">342</div>
+                        <div class="stat-label">Überlebende</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">549</div>
+                        <div class="stat-label">Verloren gegangen</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">3</div>
+                        <div class="stat-label">Passagierklassen</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="api-grid">
+                <div class="api-card">
+                    <h3>📖 Interactive Documentation</h3>
+                    <p>Explore all available API endpoints with interactive examples and detailed parameter descriptions.</p>
+                    <a href="/docs" class="api-btn" target="_blank">Open Swagger UI</a>
+                </div>
+                
+                <div class="api-card">
+                    <h3>👥 Passagierdaten</h3>
+                    <p>Zugriff auf detaillierte Informationen über Titanic-Passagiere einschließlich Demografie, Ticketinformationen und Überlebensstatus.</p>
+                    <a href="/api/v1/passengers" class="api-btn" target="_blank">Passagiere anzeigen</a>
+                </div>
+                
+                <div class="api-card">
+                    <h3>📊 Allgemeine Statistiken</h3>
+                    <p>Umfassende statistische Übersicht mit Überlebensraten, demografischen Aufschlüsselungen und analytischen Einblicken.</p>
+                    <a href="/api/v1/passengers/statistics" class="api-btn" target="_blank">Statistiken anzeigen</a>
+                </div>
+                
+                <div class="api-card">
+                    <h3>⚥ Überlebensrate nach Geschlecht</h3>
+                    <p>Analysieren Sie die Überlebensraten aufgeschlüsselt nach Geschlecht der Passagiere.</p>
+                    <a href="/api/v1/passengers/survival-by-gender" class="api-btn" target="_blank">Geschlechteranalyse</a>
+                </div>
+                
+                <div class="api-card">
+                    <h3>🎫 Überlebensrate nach Klasse</h3>
+                    <p>Untersuchen Sie die Überlebensraten basierend auf der Passagierklasse (1., 2., 3. Klasse).</p>
+                    <a href="/api/v1/passengers/survival-by-class" class="api-btn" target="_blank">Klassenanalyse</a>
+                </div>
+                
+                <div class="api-card">
+                    <h3>👶 Altersgruppen-Analyse</h3>
+                    <p>Passagiere nach Altersgruppen gruppiert mit Überlebensstatistiken und demographischen Insights.</p>
+                    <a href="/api/v1/passengers/age-groups" class="api-btn" target="_blank">Altersanalyse</a>
+                </div>
+                
+                <div class="api-card">
+                    <h3>⚡ Systemstatus</h3>
+                    <p>API-Status, Datenbankverbindung und Systemgesundheitsmetriken überwachen.</p>
+                    <a href="/health" class="api-btn" target="_blank">Status prüfen</a>
+                </div>
+                
+                <div class="api-card">
+                    <h3>� Alternative Dokumentation</h3>
+                    <p>Zugriff auf die ReDoc-Version der API-Dokumentation mit einem anderen Layout und Stil.</p>
+                    <a href="/redoc" class="api-btn" target="_blank">ReDoc öffnen</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>🚢 Titanic API v1.0.0 • Built with FastAPI & PostgreSQL • Historical data from 1912</p>
+        </div>
+    </div>
+</body>
+</html>

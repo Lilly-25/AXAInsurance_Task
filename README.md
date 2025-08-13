@@ -1,6 +1,6 @@
 # 🚢 Titanic API
 
-Eine vollständige REST API für Titanic-Passagierdaten mit automatisierter Bereitstellung und **HTTP Basic Authentifizierung**.
+Eine vollständige REST API für Titanic-Passagierdaten mit automatisierter Bereitstellung und **schöner Web-Anmeldung**.
 
 ## ⚡ Schnellstart
 
@@ -20,12 +20,14 @@ Eine vollständige REST API für Titanic-Passagierdaten mit automatisierter Bere
 
 ## 🔐 Authentifizierung
 
-Die API verwendet HTTP Basic Authentication - einfach Benutzername/Passwort eingeben:
+Die API verwendet eine schöne **Titanic-themed Web-Anmeldung** mit drei Benutzerrollen:
 
-**Autorisierte Benutzer:**
-- 👑 `admin` / `secret` - Vollzugriff
-- 📊 `analyst` / `password123` - Datenanalyse
-- 👀 `viewer` / `view2024` - Nur-Lese-Zugriff
+- **Administrator** - Vollzugriff
+- **Datenanalyst** - Datenanalyse
+- **Betrachter** - Nur Ansicht
+
+Einfach zu http://localhost:8000 navigieren und sich anmelden!
+
 
 ## 🌐 Öffentlicher Zugang mit Ngrok
 
@@ -55,7 +57,8 @@ python main.py --public # Öffentlich mit ngrok
 
 ## 📖 Was Sie erhalten
 
-- **Sichere API** mit HTTP Basic Authentication
+- **Schöne Web-Anmeldung** mit Titanic-Design
+- **Dashboard** mit rollenbasiertem Zugang
 - **Vollständige API** mit Passagierdaten und Statistiken
 - **Interaktive Dokumentation** unter http://localhost:8000/docs
 - **Gesundheitsprüfung** unter http://localhost:8000/health
@@ -88,17 +91,47 @@ Tests ausführen mit:
 pytest tests/ -v
 ```
 
+## 📁 Projektstruktur
+
+```
+AXAInsurance_Task/
+├── api/                    # API Quellcode
+│   ├── database/          # Datenbankverbindung
+│   ├── middleware/        # Authentifizierungs-Middleware
+│   ├── models/           # Datenmodelle
+│   ├── routes/           # Authentifizierungs-Routen
+│   ├── routers/          # API-Endpunkt-Router
+│   ├── templates/        # HTML-Templates (Login, Dashboard)
+│   └── utils/            # Hilfsfunktionen
+├── data/                 # Datenbank-Dateien
+├── logs/                 # Log-Dateien
+├── notebooks/            # Jupyter Notebooks
+├── scripts/              # Setup- und Hilfsskripte
+├── sql/                  # SQL-Initialisierungsskripte
+├── tests/                # Testsuite
+│   ├── integration/      # Integrationstests
+│   ├── performance/      # Performance-Tests
+│   └── unit/            # Unit-Tests
+├── .github/workflows/    # CI/CD Pipeline
+├── docker-compose.yml    # Container-Konfiguration
+├── main.py              # Hauptanwendung
+└── requirements.txt     # Python-Abhängigkeiten
+```
+
 ## 📂 API-Endpunkte
 
 Sobald die Anwendung läuft, können Sie folgende Endpunkte nutzen:
 
 **Öffentlich:**
+- **� Anmeldung**: http://localhost:8000
 - **📚 Dokumentation**: http://localhost:8000/docs
 - **❤️ Gesundheitsprüfung**: http://localhost:8000/health
 
-**Geschützt (HTTP Basic Auth erforderlich):**
+**Geschützt (Nach Anmeldung verfügbar):**
+- **📊 Dashboard**: http://localhost:8000/dashboard
 - **👥 Passagiere**: http://localhost:8000/api/v1/passengers
 - **📊 Statistiken**: http://localhost:8000/api/v1/passengers/statistics
+- **📈 Überlebensanalyse**: http://localhost:8000/api/v1/passengers/survival-by-gender
 
 ## 🚀 Das war's!
 

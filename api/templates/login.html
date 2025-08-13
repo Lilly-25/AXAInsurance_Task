@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Titanic API - Willkommen an Bord</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            max-width: 450px;
+            width: 90%;
+            animation: fadeIn 1s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .header {
+            background: linear-gradient(45deg, #1a237e, #3949ab);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+        }
+        
+        .titanic-ship {
+            font-size: 60px;
+            margin-bottom: 10px;
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        .form-container {
+            padding: 40px 30px;
+        }
+        
+        .welcome-text {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #333;
+        }
+        
+        .welcome-text h2 {
+            color: #1a237e;
+            margin-bottom: 10px;
+            font-size: 24px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 600;
+        }
+        
+        input[type="text"], input[type="password"] {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: #f9f9f9;
+        }
+        
+        input[type="text"]:focus, input[type="password"]:focus {
+            outline: none;
+            border-color: #3949ab;
+            background: white;
+            box-shadow: 0 0 10px rgba(57, 73, 171, 0.2);
+        }
+        
+        .login-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(45deg, #1a237e, #3949ab);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+        
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(26, 35, 126, 0.3);
+        }
+        
+        .error-message {
+            background: #ffebee;
+            color: #c62828;
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #c62828;
+        }
+        
+        .info-hint {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-size: 14px;
+            color: #1565c0;
+            border-left: 4px solid #2196f3;
+        }
+        
+        .info-hint h4 {
+            margin-bottom: 8px;
+            color: #0d47a1;
+        }
+        
+        .api-links {
+            text-align: center;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+        }
+        
+        .api-links a {
+            color: #3949ab;
+            text-decoration: none;
+            margin: 0 10px;
+            font-weight: 600;
+        }
+        
+        .api-links a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="titanic-ship">🚢</div>
+            <h1>Willkommen an Bord</h1>
+            <p>Titanic Passagierdaten API</p>
+        </div>
+        
+        <div class="form-container">
+            <div class="welcome-text">
+                <h2>Alle an Bord!</h2>
+                <p>Bitte authentifizieren Sie sich, um auf die Passagierdaten zuzugreifen und die Geschichte der Titanic zu erkunden.</p>
+            </div>
+            
+            {% if error %}
+            <div class="error-message">
+                {{ error }}
+            </div>
+            {% endif %}
+            
+            <form method="post" action="/auth/login">
+                <div class="form-group">
+                    <label for="username">👤 Benutzername</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">🔐 Passwort</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                
+                <button type="submit" class="login-btn">
+                    ⚓ Schiff betreten
+                </button>
+            </form>
+            
+            <div class="info-hint">
+                <h4>🎫 Anmeldung erforderlich</h4>
+                <p>Verwenden Sie Ihre zugewiesenen Anmeldedaten. Je nach Benutzerrolle haben Sie unterschiedliche Zugriffsmöglichkeiten auf die Systemfunktionen - von Nur-Lesen-Zugriff bis hin zu vollständigen Administratorrechten.</p>
+            </div>
+            
+            <div class="api-links">
+                <a href="/health">⚡ Systemstatus</a>
+                <a href="https://github.com/Lilly-25/AXAInsurance_Task">📚 Dokumentation</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

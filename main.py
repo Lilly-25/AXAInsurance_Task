@@ -7,12 +7,14 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import RedirectResponse
+from fastapi.templating import Jinja2Templates
 import logging
 from contextlib import asynccontextmanager
 
 from api.routers import passengers
+from api.routes import auth
 from api.database.connection import init_database
-from api.middleware.auth import GlobalBasicAuthMiddleware
+from api.middleware.auth import SessionAuthMiddleware
 
 # Logging-Konfiguration
 logging.basicConfig(
@@ -44,21 +46,19 @@ app = FastAPI(
     description="""
     **REST API zur Interaktion mit der Titanic-Passagierdatenbank**
     
-    ## 🔐 Einfache Authentifizierung
+    ## � Welcome Aboard the Titanic API!
     
-    **Diese API verwendet HTTP Basic Authentication - einfach Username/Password eingeben!**
+    **Diese API bietet eine schöne Web-Oberfläche für die Authentifizierung!**
     
-    **Autorisierte Benutzer:**
-    - Username: `admin`, Password: `secret` - Vollzugriff
-    - Username: `analyst`, Password: `password123` - Datenanalyse  
-    - Username: `viewer`, Password: `view2024` - Nur-Lese-Zugriff
+    **🎫 So steigen Sie ein:**
+    1. Besuchen Sie [/auth/](/auth/) für die Anmeldung
+    2. Verwenden Sie einen der verfügbaren Zugänge:
+       - **admin** / secret (Vollzugriff)
+       - **analyst** / password123 (Datenanalyse)  
+       - **viewer** / view2024 (Nur-Lese-Zugriff)
+    3. Nach der Anmeldung erhalten Sie Zugang zu allen API-Endpunkten
     
-    **So authentifizieren Sie sich:**
-    1. Klicken Sie auf "Authorize" 🔒 oben rechts
-    2. Geben Sie Ihren **Username** und **Password** direkt ein
-    3. Klicken Sie "Authorize"
-    
-    **Viel einfacher als JWT-Tokens!**
+    **🌊 Erkunden Sie die Geschichte des berühmtesten Schiffs der Welt!**
     """,
     version="1.0.0",
     docs_url="/docs",
@@ -89,8 +89,8 @@ def custom_openapi():
 
 app.openapi = custom_openapi
 
-# Global Authentication Middleware - PROTECTS ENTIRE API with HTTP Basic Auth
-app.add_middleware(GlobalBasicAuthMiddleware)
+# Session-based Authentication Middleware - PROTECTS ENTIRE API with beautiful login page
+app.add_middleware(SessionAuthMiddleware)
 
 # CORS-Middleware hinzufügen für Cross-Origin-Requests
 app.add_middleware(
@@ -108,6 +108,7 @@ app.add_middleware(
 )
 
 # Router einbinden
+app.include_router(auth.router, prefix="/auth", tags=["authentication"])
 app.include_router(passengers.router, prefix="/api/v1", tags=["passengers"])
 
 
@@ -115,9 +116,9 @@ app.include_router(passengers.router, prefix="/api/v1", tags=["passengers"])
 async def root():
     """
     Root-Endpoint der API.
-    Leitet zur Dokumentation weiter.
+    Leitet zur schönen Anmeldeseite weiter.
     """
-    return RedirectResponse(url="/docs")
+    return RedirectResponse(url="/auth/")
 
 
 @app.get("/health")

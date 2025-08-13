@@ -1,43 +1,51 @@
 """
-Global HTTP Basic Authentication middleware for the Titanic API.
-Users can enter username/password directly in browser - much more user-friendly!
+Session-based authentication middleware for the Titanic API.
+Redirects unauthenticated users to the beautiful login page.
 """
 
-from fastapi import Request, HTTPException, status
-from fastapi.responses import JSONResponse
+from fastapi import Request
+from fastapi.responses import RedirectResponse
 from starlette.middleware.base import BaseHTTPMiddleware
-import base64
 
-# User credentials (username, password)
-AUTHORIZED_USERS = {
-    "admin": "secret",
-    "analyst": "password123", 
-    "viewer": "view2024"
-}
-
-def verify_password(plain_password: str, stored_password: str) -> bool:
-    """Verify password (simple comparison for Basic Auth)"""
-    return plain_password == stored_password
-
-class GlobalBasicAuthMiddleware(BaseHTTPMiddleware):
+class SessionAuthMiddleware(BaseHTTPMiddleware):
     """
-    Global HTTP Basic Authentication middleware.
-    Users can enter username/password directly in browser prompts.
+    Session-based authentication middleware.
+    Redirects unauthenticated users to login page instead of showing browser popup.
     """
     
     # Public endpoints that don't require authentication
     PUBLIC_PATHS = {
         "/",
         "/health", 
+        "/auth/",
+        "/auth/login",
+        "/auth/logout",
+        "/auth/check",
         "/docs",
         "/redoc",
         "/openapi.json",
         "/favicon.ico"
     }
     
+    # Static file patterns
+    STATIC_PATTERNS = [
+        "/static/",
+        ".css",
+        ".js",
+        ".png",
+        ".jpg",
+        ".ico"
+    ]
+    
+    def __init__(self, app):
+        super().__init__(app)
+        # Import here to avoid circular imports
+        from api.routes.auth import active_sessions
+        self.active_sessions = active_sessions
+    
     async def dispatch(self, request: Request, call_next):
         """
-        Process each request and check HTTP Basic Authentication.
+        Process each request and check session authentication.
         """
         path = request.url.path
         
@@ -45,9 +53,31 @@ class GlobalBasicAuthMiddleware(BaseHTTPMiddleware):
         if path in self.PUBLIC_PATHS:
             response = await call_next(request)
             return response
+            
+        # Allow static files
+        if any(pattern in path for pattern in self.STATIC_PATTERNS):
+            response = await call_next(request)
+            return response
         
-        # Check for Authorization header
-        authorization = request.headers.get("authorization")
+        # Check for valid session
+        session_id = request.cookies.get("session_id")
+        if session_id and session_id in self.active_sessions:
+            # Valid session - proceed
+            response = await call_next(request)
+            return response
+        
+        # No valid session - redirect to login
+        # If it's an API call (JSON request), return 401
+        if (request.headers.get("accept", "").startswith("application/json") or 
+            path.startswith("/api/")):
+            from fastapi.responses import JSONResponse
+            return JSONResponse(
+                status_code=401,
+                content={"detail": "Authentication required. Please login at /auth/"}
+            )
+        
+        # For browser requests, redirect to login page
+        return RedirectResponse(url="/auth/", status_code=302)
         if not authorization:
             return JSONResponse(
                 status_code=status.HTTP_401_UNAUTHORIZED,

@@ -136,6 +136,49 @@ async def health_check():
 
 if __name__ == "__main__":
     import uvicorn
+    import sys
+    import os
+    
+    # Check for --public flag
+    public_mode = "--public" in sys.argv
+    
+    if public_mode:
+        try:
+            from pyngrok import ngrok
+            import threading
+            import time
+            
+            def start_ngrok():
+                """Start ngrok tunnel in a separate thread"""
+                time.sleep(2)  # Wait for uvicorn to start
+                try:
+                    tunnel = ngrok.connect(8000)
+                    print(f"\n🌐 PUBLIC API URLs:")
+                    print(f"📚 Interactive Docs: {tunnel.public_url}/docs")
+                    print(f"🔗 API Base URL: {tunnel.public_url}/api/v1/")
+                    print(f"❤️ Health Check: {tunnel.public_url}/health")
+                    print(f"\n🔐 Authentication required:")
+                    print(f"   Username: admin, Password: secret")
+                    print(f"   Username: analyst, Password: password123")
+                    print(f"   Username: viewer, Password: view2024")
+                    print(f"\n📤 SHARE THIS URL: {tunnel.public_url}/docs")
+                    print(f"\n⏹️ Press Ctrl+C to stop...\n")
+                except Exception as e:
+                    print(f"❌ Ngrok error: {e}")
+                    print(f"Make sure ngrok auth token is configured!")
+            
+            # Start ngrok in background thread
+            ngrok_thread = threading.Thread(target=start_ngrok, daemon=True)
+            ngrok_thread.start()
+            
+            print("🚀 Starting API with public ngrok tunnel...")
+            
+        except ImportError:
+            print("❌ pyngrok not installed. Install with: pip install pyngrok")
+            sys.exit(1)
+    else:
+        print("🚀 Starting API locally...")
+        print("💡 For public access, run: python main.py --public")
 
     # API in der Entwicklungsumgebung starten
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True, log_level="info")

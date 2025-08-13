@@ -1,6 +1,6 @@
 # 🚢 Titanic API
 
-Eine vollständige REST API für Titanic-Passagierdaten mit automatisierter Bereitstellung und **JWT-Authentifizierung**.
+Eine vollständige REST API für Titanic-Passagierdaten mit automatisierter Bereitstellung und **HTTP Basic Authentifizierung**.
 
 ## ⚡ Schnellstart
 
@@ -10,29 +10,56 @@ Eine vollständige REST API für Titanic-Passagierdaten mit automatisierter Bere
 ./deploy.ps1
 ```
 
-> **Hinweis:** Dieses Projekt ist für **Windows** entwickelt und getestet.
+**Für öffentlichen Zugang (über ngrok):**
 
-Dieser eine Befehl wird:
-- ✅ Daten aus der Titanic-Datenbank extrahieren
-- ✅ PostgreSQL mit den Daten starten
-- ✅ Den API-Server mit Authentifizierung starten
-- ✅ Alles unter http://localhost:8000 zugänglich machen
+```powershell
+./deploy.ps1 -Public
+```
+
+> **Hinweis:** Dieses Projekt ist für **Windows** entwickelt und getestet.
 
 ## 🔐 Authentifizierung
 
-Die API erfordert JWT-Token für den Zugriff auf Passagierdaten:
+Die API verwendet HTTP Basic Authentication - einfach Benutzername/Passwort eingeben:
 
 **Autorisierte Benutzer:**
 - 👑 `admin` / `secret` - Vollzugriff
 - 📊 `analyst` / `password123` - Datenanalyse
 - 👀 `viewer` / `view2024` - Nur-Lese-Zugriff
 
+## 🌐 Öffentlicher Zugang mit Ngrok
+
+### Einmalige Einrichtung:
+1. **Ngrok-Konto erstellen**: https://dashboard.ngrok.com/signup
+2. **Auth-Token kopieren**: https://dashboard.ngrok.com/get-started/your-authtoken
+3. **Token konfigurieren**:
+```powershell
+.\axaenv\Scripts\Activate.ps1
+python -c "from pyngrok import ngrok; ngrok.set_auth_token('YOUR_TOKEN_HERE')"
+```
+
+### Verwendung:
+```powershell
+# Lokal bereitstellen
+./deploy.ps1
+
+# Öffentlich verfügbar machen
+./deploy.ps1 -Public
+
+# Oder direkt:
+python main.py          # Lokal
+python main.py --public # Öffentlich mit ngrok
+```
+
+**⚠️ Wichtig:** Die ngrok-URL ändert sich bei jedem Neustart (z.B. `https://abc123.ngrok-free.app/docs`)
+
 ## 📖 Was Sie erhalten
 
-- **Sichere API** mit JWT-Token-Authentifizierung
+- **Sichere API** mit HTTP Basic Authentication
 - **Vollständige API** mit Passagierdaten und Statistiken
 - **Interaktive Dokumentation** unter http://localhost:8000/docs
 - **Gesundheitsprüfung** unter http://localhost:8000/health
+- **Öffentlicher Zugang** über ngrok-Tunnel
 - **Automatisierte Einrichtung** - keine manuelle Konfiguration erforderlich
 
 ## 🔧 Manuelle Einrichtung (Optional)
@@ -68,12 +95,21 @@ Sobald die Anwendung läuft, können Sie folgende Endpunkte nutzen:
 **Öffentlich:**
 - **📚 Dokumentation**: http://localhost:8000/docs
 - **❤️ Gesundheitsprüfung**: http://localhost:8000/health
-- **🔐 Login**: http://localhost:8000/api/v1/auth/login
 
-**Geschützt (JWT-Token erforderlich):**
+**Geschützt (HTTP Basic Auth erforderlich):**
 - **👥 Passagiere**: http://localhost:8000/api/v1/passengers
 - **📊 Statistiken**: http://localhost:8000/api/v1/passengers/statistics
 
 ## 🚀 Das war's!
 
-Das Deploy-Skript übernimmt alles für Sie. Führen Sie einfach `./deploy.ps1` aus und erkunden Sie die API!
+**Lokale Bereitstellung:**
+```powershell
+./deploy.ps1
+```
+
+**Öffentliche Bereitstellung:**
+```powershell
+./deploy.ps1 -Public
+```
+
+Das Deploy-Skript übernimmt alles für Sie!

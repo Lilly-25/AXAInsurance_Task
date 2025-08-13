@@ -3,7 +3,7 @@ Router für Passagier-Endpunkte der Titanic API.
 Verwaltet alle HTTP-Endpunkte für Passagierdaten und Statistiken.
 """
 
-from fastapi import APIRouter, HTTPException, Query, Depends
+from fastapi import APIRouter, HTTPException, Query
 from typing import Optional, List
 import logging
 
@@ -183,7 +183,7 @@ def build_count_query(filters: Optional[PassengerFilter] = None) -> tuple[str, t
     "/passengers",
     response_model=PassengerListResponse,
     summary="Passagiere abrufen",
-    description="Ruft eine paginierte Liste von Titanic-Passagieren mit optionalen Filtern ab.",
+    description="Ruft eine paginierte Liste von Titanic-Passagieren mit optionalen Filtern ab. **Authentifizierung erforderlich.**",
 )
 async def get_passengers(
     page: int = Query(1, ge=1, description="Seitennummer (beginnend bei 1)"),
@@ -262,7 +262,7 @@ async def get_passengers(
     "/passengers/statistics",
     response_model=StatisticsResponse,
     summary="Passagierstatistiken",
-    description="Ruft statistische Informationen über die Titanic-Passagiere ab.",
+    description="Ruft statistische Informationen über die Titanic-Passagiere ab. **Authentifizierung erforderlich.**",
 )
 async def get_passenger_statistics():
     """

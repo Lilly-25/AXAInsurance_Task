@@ -12,6 +12,7 @@ from contextlib import asynccontextmanager
 
 from api.routers import passengers
 from api.database.connection import init_database
+from api.middleware.auth import GlobalBasicAuthMiddleware
 
 # Logging-Konfiguration
 logging.basicConfig(
@@ -40,12 +41,56 @@ async def lifespan(app: FastAPI):
 # FastAPI-Anwendung erstellen
 app = FastAPI(
     title="Titanic Passagier API",
-    description="REST API zur Interaktion mit der Titanic-Passagierdatenbank",
+    description="""
+    **REST API zur Interaktion mit der Titanic-Passagierdatenbank**
+    
+    ## 🔐 Einfache Authentifizierung
+    
+    **Diese API verwendet HTTP Basic Authentication - einfach Username/Password eingeben!**
+    
+    **Autorisierte Benutzer:**
+    - Username: `admin`, Password: `secret` - Vollzugriff
+    - Username: `analyst`, Password: `password123` - Datenanalyse  
+    - Username: `viewer`, Password: `view2024` - Nur-Lese-Zugriff
+    
+    **So authentifizieren Sie sich:**
+    1. Klicken Sie auf "Authorize" 🔒 oben rechts
+    2. Geben Sie Ihren **Username** und **Password** direkt ein
+    3. Klicken Sie "Authorize"
+    
+    **Viel einfacher als JWT-Tokens!**
+    """,
     version="1.0.0",
     docs_url="/docs",
     redoc_url="/redoc",
     lifespan=lifespan,
 )
+
+# Security scheme für Swagger UI (HTTP Basic Auth)
+from fastapi.openapi.utils import get_openapi
+
+def custom_openapi():
+    if app.openapi_schema:
+        return app.openapi_schema
+    openapi_schema = get_openapi(
+        title="Titanic Passagier API",
+        version="1.0.0",
+        description="REST API zur Interaktion mit der Titanic-Passagierdatenbank",
+        routes=app.routes,
+    )
+    openapi_schema["components"]["securitySchemes"] = {
+        "HTTPBasic": {
+            "type": "http",
+            "scheme": "basic",
+        }
+    }
+    app.openapi_schema = openapi_schema
+    return app.openapi_schema
+
+app.openapi = custom_openapi
+
+# Global Authentication Middleware - PROTECTS ENTIRE API with HTTP Basic Auth
+app.add_middleware(GlobalBasicAuthMiddleware)
 
 # CORS-Middleware hinzufügen für Cross-Origin-Requests
 app.add_middleware(
@@ -79,11 +124,13 @@ async def root():
 async def health_check():
     """
     Health-Check-Endpoint für Monitoring und Load Balancer.
+    Dieser Endpoint benötigt keine Authentifizierung.
     """
     return {
         "status": "healthy",
         "message": "Titanic API ist betriebsbereit",
         "version": "1.0.0",
+        "authentication": "required_for_data_endpoints",
     }
 
 
